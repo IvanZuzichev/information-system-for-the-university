@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список дисциплин</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h1 class="mt-4">Список дисциплин</h1>
+
+    <h2 class="mt-4">Добавить дисциплину:</h2>
+    <form action="/disciplines/add" method="post">
+        <div class="form-group">
+            <label for="name_discipline">Название дисциплины:</label>
+            <input type="text" id="name_discipline" name="name_discipline" class="form-control" placeholder="Введите название дисциплины" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Добавить</button>
+    </form>
+
+    <h2 class="mt-4">Список всех дисциплин:</h2>
+    <ul class="list-group">
+        <th:block th:each="discipline : ${disciplines}">
+            <th:block th:if="${discipline.getTeachers().size > 0}">
+                <p>Преподаватели: </p>
+                <ul>
+                    <th:block th:each="teacher: ${discipline.getTeachers()}">
+                        <li>
+                            <p th:text="'Дисплина: ' + ${discipline.name}"></p>
+                        </li>
+                    </th:block>
+                </ul>
+            </th:block>
+            <span th:if="${discipline.isDeleted()}">(Удалена)</span>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span th:text="${discipline.name} + ' ' + ${discipline.isDeleted()}"></span>
+                <div>
+                    <form action="/disciplines/update" method="post" style="display:inline;" th:if="${!discipline.deleted}">
+                        <input type="hidden" name="id" th:value="${discipline.id}"/>
+                        <input type="text" name="name_discipline" th:value="${discipline.name}" placeholder="Название дисциплины" required class="form-control d-inline" style="width: 200px;"/>
+                        <button type="submit" class="btn btn-warning btn-sm">Обновить</button>
+                    </form>
+
+                    <form action="/disciplines/delete" method="post" style="display:inline;" th:if="${!discipline.deleted}">
+                        <input type="hidden" name="id" th:value="${discipline.id}"/>
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+                    </form>
+                    <p>Добавить преподавателя:</p>
+                    <th:block th:if="${teachers} != null">
+                        <th:block th:each="teacher : ${teachers}">
+                            <p th:text="'Преподаватель: ' + ${teacher.surname}"></p>
+                            <form action="/disciplines/teachers-add" method="post">
+                                <input type="hidden" name="id_discipline" th:value="${discipline.id}">
+                                <input type="hidden" name="id_teacher" th:value="${teacher.id}">
+                                <button type="submit">Добавить преподавателя</button>
+                            </form>
+                        </th:block>
+                    </th:block>
+                </div>
+            </li>
+        </th:block>
+    </ul>
+
+    <h2 class="mt-4">Фильтрация:</h2>
+    <form action="/disciplines/search" method="get" class="form-inline">
+        <label for="name_discipline" class="mr-2">Название дисциплины:</label>
+        <input type="text" name="name_discipline" th:value="${name_discipline}" placeholder="Введите название дисциплины" class="form-control mr-2">
+        <button type="submit" class="btn btn-info">Фильтровать</button>
+    </form>
+
+    <form action="/disciplines/delete-all" method="post" class="mt-2">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Подтвердите полное удаление');">Удалить всех удаленных</button>
+    </form>
+
+    <nav aria-label="Page navigation example" class="mt-4">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/disciplines/search(page=${currentPage - 1}, name_discipline=${name_discipline})}" th:if="${currentPage > 0}" aria-label="Предыдущая">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Предыдущая</span>
+                </a>
+            </li>
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+                    <a class="page-link" th:href="@{/disciplines/search(page=${i - 1}, name_discipline=${name_discipline})}" th:text="${i}"></a>
+                </li>
+            </th:block>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/disciplines/search(page=${currentPage + 1}, name_discipline=${name_discipline})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Следующая</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

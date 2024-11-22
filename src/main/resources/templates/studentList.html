@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Список студентов</title>
+</head>
+<body>
+<h1>Список студентов</h1>
+
+
+<h2>Добавить студента:</h2>
+<form action="/students/add" method="post">
+  <div>
+    <label for="name">Имя:</label>
+    <input type="text" id="name" name="name" placeholder="Имя" required>
+  </div>
+  <div>
+    <label for="lastName">Фамилия:</label>
+    <input type="text" id="lastName" name="lastName" placeholder="Фамилия" required>
+  </div>
+  <div>
+    <label for="firstName">Отчество:</label>
+    <input type="text" id="firstName" name="firstName" placeholder="Отчество" required>
+  </div>
+  <div>
+    <label for="middleName">Дополнительное имя:</label>
+    <input type="text" id="middleName" name="middleName" placeholder="Дополнительное имя">
+  </div>
+  <div>
+    <label for="mail">Почта:</label>
+    <input type="text" id="mail" name="mail" placeholder="Почта" required>
+  </div>
+  <select name="groop" required>
+    <option value="" disabled selected>Выберите группу</option>
+    <div th:each="groop : ${groops}">
+      <option th:value="${groop.id}" th:text="${groop.name}"></option>
+    </div>
+  </select>
+  <button type="submit">Добавить</button>
+</form>
+
+<h2>Список всех студентов:</h2>
+<ul>
+  <th:block th:each="student : ${students}">
+    <li>
+      <span th:text="${student.name} + ' ' + ${student.lastName} + ' ' + ${student.firstName} + ' ' + ${student.middleName} + ' ' + ${student.isDeleted() "></span>
+      <span th:text="'(Почта: ' + ${student.mail} + ')'" style="margin-left: 10px;"></span>
+      <span th:if="${student.deleted}">(Удален)</span>
+
+      <form action="/students/update" method="post" style="display:inline;" th:if="${!student.deleted}">
+        <input type="hidden" name="id" th:value="${student.id}"/>
+        <input type="hidden" name="mail" th:value="${student.mail}" placeholder="Почта"/>
+        <input type="text" name="name" th:value="${student.name}" placeholder="Имя" required/>
+        <input type="text" name="lastName" th:value="${student.lastName}" placeholder="Фамилия" required/>
+        <input type="text" name="firstName" th:value="${student.firstName}" placeholder="Отчество" required/>
+        <input type="text" name="middleName" th:value="${student.middleName}" placeholder="Дополнительное имя"/>
+        <select name="groop" required>
+          <option value="" disabled selected>Выберите группу</option>
+          <div th:each="groop : ${groops}">
+            <option th:value="${groop.id}" th:text="${groop.name}"></option>
+          </div>
+        </select>
+        <button type="submit">Обновить</button>
+      </form>
+
+      <form action="/students/delete" method="post" style="display:inline;" th:if="${!student.deleted}">
+        <input type="hidden" name="id" th:value="${student.id}"/>
+        <button type="submit" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+      </form>
+    </li>
+  </th:block>
+</ul>
+
+<h2>Фильтрация:</h2>
+<form action="/students/search" method="get">
+  <label for="name">Имя:</label>
+  <input type="text" name="name" th:value="${name}" placeholder="Имя студента">
+  <label for="mail">Почта:</label>
+  <input type="text" name="group" th:value="${mail}" placeholder="Почта">
+  <label for="middleName">Дополнительное имя:</label>
+  <input type="text" name="middleName" th:value="${middleName}" placeholder="Дополнительное имя">
+  <button type="submit">Фильтровать</button>
+</form>
+
+<form action="/students/delete-all" method="post">
+  <button type="submit" onclick="return confirm('Подтвердите полное удаление');">Удалить всех удаленных</button>
+</form>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/students/search(page=${currentPage - 1}, name=${name}, group=${group}, middleName=${middleName})}" th:if="${currentPage > 0}" aria-label="Прошлая">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Прошлая</span>
+      </a>
+    </li>
+    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+      <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/students/search(page=${i - 1}, name=${name}, group=${group}, middleName=${middleName})}" th:text="${i}">
+        </a>
+      </li>
+    </th:block>
+    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/students/search(page=${currentPage + 1}, name=${name}, mail=${mail}, middleName=${middleName})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Следующая</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+</body>
+</html>

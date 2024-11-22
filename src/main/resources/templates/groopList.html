@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Список групп</title>
+</head>
+<body>
+<h1>Список групп</h1>
+
+<h2>Добавить группу:</h2>
+<form action="/groops/add" method="post">
+  <div>
+    <label for="name_group">Название группы:</label>
+    <input type="text" id="name_group" name="name" placeholder="Название группы" required>
+  </div>
+  <button type="submit">Добавить</button>
+</form>
+
+<h2>Список всех групп:</h2>
+<ul>
+  <th:block th:each="group : ${groops}">
+    <li>
+      <span th:text="${group.name} + ' ' + ${group.isDeleted()}"></span>
+      <span th:if="${group.deleted}">(Удалена)</span>
+
+      <form action="/groops/update" method="post" style="display:inline;" th:if="${!group.deleted}">
+        <input type="hidden" name="id" th:value="${group.id}"/>
+        <input type="text" name="name" th:value="${group.name}" placeholder="Название группы" required/>
+        <button type="submit">Обновить</button>
+      </form>
+
+      <form action="/groops/delete" method="post" style="display:inline;" th:if="${!group.deleted}">
+        <input type="hidden" name="id" th:value="${group.id}"/>
+        <button type="submit" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+      </form>
+    </li>
+  </th:block>
+</ul>
+
+<h2>Фильтрация:</h2>
+<form action="/groops/search" method="get">
+  <label for="name_group">Название группы:</label>
+  <input type="text" name="name_group" th:value="${name_groop}" placeholder="Название группы">
+  <button type="submit">Фильтровать</button>
+</form>
+
+<form action="/groops/delete-all" method="post">
+  <button type="submit" onclick="return confirm('Подтвердите полное удаление');">Удалить всех удаленных</button>
+</form>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/groups/search(page=${currentPage - 1}, name_group=${name_group})}" th:if="${currentPage > 0}" aria-label="Предыдущая">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Предыдущая</span>
+      </a>
+    </li>
+    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+      <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/groups/search(page=${i - 1}, name_group=${name_group})}" th:text="${i}">
+        </a>
+      </li>
+    </th:block>
+    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/groups/search(page=${currentPage + 1}, name_group=${name_group})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Следующая</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Список паспортов</title>
+</head>
+<body>
+<h1>Список паспортов</h1>
+
+<h2>Добавить паспорт:</h2>
+<form action="/pasports/add" method="post">
+  <div>
+    <label for="series">Серия:</label>
+    <input type="text" id="series" name="series" placeholder="Серия" required>
+  </div>
+  <div>
+    <label for="number">Номер:</label>
+    <input type="text" id="number" name="number" placeholder="Номер" required>
+  </div>
+  <select name="studentname">
+    <div th:each="student : ${students}">
+      <option th:text="${student.name}"></option>
+    </div>
+  </select>
+  <button type="submit">Добавить</button>
+</form>
+
+<h2>Список всех паспортов:</h2>
+<ul>
+  <th:block th:each="pasport : ${pasports}">
+    <li>
+      <span th:text="'Серия: ' + ${pasport.series} + ', Номер: ' + ${pasport.number} + ' ' + ${pasport.isDeleted()}"></span>
+      <span th:if="${pasport.deleted}">(Удален)</span>
+
+      <form action="/pasports/update" method="post" style="display:inline;" th:if="${!pasport.deleted}">
+        <input type="hidden" name="id" th:value="${pasport.id}"/>
+        <input type="number" name="series" th:value="${pasport.series}" placeholder="Серия" required/>
+        <input type="number" name="number" th:value="${pasport.number}" placeholder="Номер" required/>
+        <select name="studentname">
+          <div th:each="student : ${students}">
+            <option th:text="${student.name}"></option>
+          </div>
+        </select>
+        <button type="submit">Обновить</button>
+      </form>
+
+      <form action="/pasports/delete" method="post" style="display:inline;" th:if="${!pasport.deleted}">
+        <input type="hidden" name="id" th:value="${pasport.id}"/>
+        <button type="submit" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+      </form>
+    </li>
+  </th:block>
+</ul>
+
+<h2>Фильтрация:</h2>
+<form action="/pasports/search" method="get">
+  <label for="series">Серия:</label>
+  <input type="number" name="series" th:value="${series}" placeholder="Серия паспорта">
+  <label for="number">Номер:</label>
+  <input type="number" name="number" th:value="${number}" placeholder="Номер паспорта">
+  <button type="submit">Фильтровать</button>
+</form>
+
+<form action="/pasports/delete-all" method="post">
+  <button type="submit" onclick="return confirm('Подтвердите полное удаление');">Удалить все удаленные</button>
+</form>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/pasports/search(page=${currentPage - 1}, series=${series}, number=${number})}" th:if="${currentPage > 0}" aria-label="Прошлая">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Прошлая</span>
+      </a>
+    </li>
+    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+      <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/pasports/search(page=${i - 1}, series=${series}, number=${number})}" th:text="${i}">
+        </a>
+      </li>
+    </th:block>
+    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/pasports/search(page=${currentPage + 1}, series=${series}, number=${number})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Следующая</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+</body>
+</html>

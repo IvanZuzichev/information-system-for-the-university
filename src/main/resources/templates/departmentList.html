@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список кафедр</title>
+</head>
+<body>
+<h1>Список кафедр</h1>
+
+<h2>Добавить кафедру:</h2>
+<form action="/departments/add" method="post">
+    <div>
+        <label for="name_department">Название кафедры:</label>
+        <input type="text" id="name_department" name="name" placeholder="Название кафедры" required>
+    </div>
+    <button type="submit">Добавить</button>
+</form>
+
+<h2>Список всех групп:</h2>
+<ul>
+    <th:block th:each="department : ${departments}">
+        <li>
+            <span th:text="${department.name} + ' ' + ${department.isDeleted()}"></span>
+            <span th:if="${department.deleted}">(Удалена)</span>
+
+            <form action="/departments/update" method="post" style="display:inline;" th:if="${!department.deleted}">
+                <input type="hidden" name="id" th:value="${department.id}"/>
+                <input type="text" name="name" th:value="${department.name}" placeholder="Название кафедры" required/>
+                <button type="submit">Обновить</button>
+            </form>
+
+            <form action="/departments/delete" method="post" style="display:inline;" th:if="${!department.deleted}">
+                <input type="hidden" name="id" th:value="${department.id}"/>
+                <button type="submit" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+            </form>
+        </li>
+    </th:block>
+</ul>
+
+<h2>Фильтрация:</h2>
+<form action="/departments/search" method="get">
+    <label for="name_department">Название кафедры:</label>
+    <input type="text" name="name_group" th:value="${name_department}" placeholder="Название кафедры">
+    <button type="submit">Фильтровать</button>
+</form>
+
+<form action="/departments/delete-all" method="post">
+    <button type="submit" onclick="return confirm('Подтвердите полное удаление');">Удалить всех удаленных</button>
+</form>
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/departments/search(page=${currentPage - 1}, name_department=${name_department})}" th:if="${currentPage > 0}" aria-label="Предыдущая">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Предыдущая</span>
+            </a>
+        </li>
+        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+                <a class="page-link" th:href="@{/department/search(page=${i - 1}, name_department=${name_department})}" th:text="${i}">
+                </a>
+            </li>
+        </th:block>
+        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/departments/search(page=${currentPage + 1}, name_departmentp=${name_department})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Следующая</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

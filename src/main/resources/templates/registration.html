@@ -1,0 +1,23 @@
+ <!DOCTYPE html>
+      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+      <head>
+        <title>Пример безопасности Spring</title>
+      </head>
+      <body>
+      <p>Регистрация</p>
+      <div th:if="${message}">
+        <p th:text="${message}"></p>
+      </div>
+      <div th:if="${param.error}">
+        Неверное имя пользователя и пароль.
+      </div>
+      <div th:if="${param.logout}">
+        Вы были выведены из системы.
+      </div>
+      <form th:action="@{/registration}" method="post">
+        <div><label> Имя пользователя : <input type="text" name="username"/> </label></div>
+        <div><label> Пароль: <input type="password" name="password"/> </label></div>
+        <div><input type="submit" value="Войти"/></div>
+      </form>
+      </body>
+      </html>

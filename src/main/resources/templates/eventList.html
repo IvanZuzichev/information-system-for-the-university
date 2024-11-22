@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Список событий</title>
+</head>
+<body>
+<h1>Список событий</h1>
+
+<h2>Добавить событие:</h2>
+<form action="/events/add" method="post">
+  <div>
+    <label for="name">Название события:</label>
+    <input type="text" id="name" name="name" placeholder="Название события" required>
+  </div>
+  <div>
+    <label for="time_date">Дата и время:</label>
+    <input type="text" id="time_date" name="time_date" placeholder="Дата и время" required>
+  </div>
+  <button type="submit">Добавить</button>
+</form>
+
+<h2>Список всех событий:</h2>
+<ul>
+  <th:block th:each="event : ${events}">
+    <li>
+      <span th:text="${event.name} + ' ' + ${event.time_date}"></span>
+      <span th:if="${event.deleted}">(Удалено)</span>
+
+      <form action="/events/update" method="post" style="display:inline;" th:if="${!event.deleted}">
+        <input type="hidden" name="id" th:value="${event.id}"/>
+        <input type="text" name="name" th:value="${event.name}" placeholder="Название события" required/>
+        <input type="text" name="time_date" th:value="${event.time_date}" placeholder="Дата и время" required/>
+        <button type="submit">Обновить</button>
+      </form>
+
+      <form action="/events/delete" method="post" style="display:inline;" th:if="${!event.deleted}">
+        <input type="hidden" name="id" th:value="${event.id}"/>
+        <button type="submit" onclick="return confirm('Подтвердите удаление');">Удалить</button>
+      </form>
+    </li>
+  </th:block>
+</ul>
+
+<h2>Фильтрация:</h2>
+<form action="/events/search" method="get">
+  <label for="name">Название события:</label>
+  <input type="text" name="name" th:value="${name}" placeholder="Название события">
+  <button type="submit">Фильтровать</button>
+</form>
+
+<form action="/events/delete-all" method="post">
+  <button type="submit" onclick="return confirm('Подтвердите полное удаление');">Удалить всех удаленных</button>
+</form>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/events/search(page=${currentPage - 1}, name=${name})}" th:if="${currentPage > 0}" aria-label="Предыдущая">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Предыдущая</span>
+      </a>
+    </li>
+    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+      <li class="page-item" th:classappend="${currentPage == i - 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/events/search(page=${i - 1}, name=${name})}" th:text="${i}"></a>
+      </li>
+    </th:block>
+    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+      <a class="page-link" th:href="@{/events/search(page=${currentPage + 1}, name=${name})}" th:if="${currentPage < totalPages - 1}" aria-label="Следующая">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Следующая</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+</body>
+</html>
